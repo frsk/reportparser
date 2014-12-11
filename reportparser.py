@@ -2,6 +2,7 @@
 from pdfminer.pdfinterp import PDFResourceManager, process_pdf
 from pdfminer.converter import TextConverter
 
+import os
 import sys
 import StringIO
 import time
@@ -17,9 +18,9 @@ hashmatch = re.compile(r"\b([a-zA-Z0-9]{128}|[a-zA-Z0-9]{32}|[a-zA-Z0-9]{40})\b"
 
 try:
     config = ConfigParser.ConfigParser()
-    config.readfp(open("config.cfg"))
+    config.readfp(open(os.path.expanduser("~/.reportparser.conf")))
 except:
-    print >> sys.stderr, "File config.cfg not found."
+    print >> sys.stderr, "File ~/.reportparser.conf not found."
     from sys import exit
     exit(1)
 
