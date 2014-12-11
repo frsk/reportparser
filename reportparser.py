@@ -14,7 +14,7 @@ import pymongo
 import ConfigParser
 
 find_ip4 = re.compile(r"\b((?:\d{1,3}\.){3}\d{1,3})") 
-hashmatch = re.compile(r"\b([a-zA-Z0-9]{128}|[a-zA-Z0-9]{32}|[a-zA-Z0-9]{40})\b")
+hashmatch = re.compile(r"\b([a-fA-F0-9]{128}|[a-fA-F0-9]{32}|[a-fA-F0-9]{40})\b")
 
 try:
     config = ConfigParser.ConfigParser()
