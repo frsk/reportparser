@@ -1,0 +1,5 @@
+[reportparser]
+storage = /path
+
+[db]
+mongohost = hostname
