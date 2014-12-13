@@ -40,6 +40,7 @@ cvematch = re.compile(r"CVE-\d{4}-\d+\b", re.I)
 domainmatch = re.compile(r"\b(([a-zA-Z.-]{4,})\.([a-z]{1,8}))\b", re.I)
 urlmatch = re.compile(r"""((?:https?|ftp)://[^\s/$.?#].[^\s]*)""")
 filematch = re.compile(r"\b(([a-zA-Z]{2,255})\.(exe|dll|msi|so))\b", re.I)
+registrymatch = re.compile(r"(HK(?:(?:LM|CR|CU|CC)|EY_.*?)\\.*)", re.I)
 
 try:
     config = ConfigParser.ConfigParser()
@@ -125,6 +126,11 @@ def process(filename):
         if x in result['content']['url']:
             continue
         result['content']['url'].append(x)
+
+    for x in registrymatch.findall(output.getvalue()):
+        if x in result['content']['registry']:
+            continue
+        result['content']['registry'].append(x)
 
     result['file'] = {}
     result['file']['parsed'] = time.time()
