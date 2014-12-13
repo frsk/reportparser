@@ -39,15 +39,18 @@ except IOError, err:
     print >> stderr, "Could not open ~/.reportparser.conf:", err.strerror
     exit(1)
 
+
 def produce_md5(filename):
     f = file(filename, "rb")
     q = md5.new(f.read())
     return q.hexdigest()
 
+
 def produce_sha1(filename):
     f = file(filename, "rb")
     q = sha.sha(f.read())
     return q.hexdigest()
+
 
 def save_to_storage(filename):
     try:
@@ -57,6 +60,7 @@ def save_to_storage(filename):
     except (shutil.Error, IOError), err:
         print >> stderr, "Could not store {} to {}: {}".format(filename, config.get("reportparser", "storage"), err.strerror)
         return False
+
 
 def process(filename):
     result = {}
@@ -113,9 +117,10 @@ def process(filename):
 
     return result
 
+
 def store(result):
-    import pymongo
-    connection = pymongo.Connection(host=config.get("db", "mongohost"))
+    from pymongo import MongoClient
+    connection = MongoClient(config.get("db", "mongohost"))
     inteldb = connection.intel
     result['_id'] = result.pop('id')
     inteldb.reports.save(result)
@@ -125,7 +130,7 @@ if __name__ == '__main__':
     for filename in args.report:
         try:
             fp = file(filename, "rb")
-        except:
+        except IOError, err:
             print >> stderr, "File not found."
             exit(1)
 
