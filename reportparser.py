@@ -13,7 +13,7 @@ import sha
 import pymongo
 import ConfigParser
 
-find_ip4 = re.compile(r"\b((?:\d{1,3}\.){3}\d{1,3})") 
+find_ip4 = re.compile(r"\b((?:\d{1,3}\.){3}\d{1,3})")
 hashmatch = re.compile(r"\b([a-fA-F0-9]{128}|[a-fA-F0-9]{32}|[a-fA-F0-9]{40})\b")
 
 try:
@@ -49,36 +49,36 @@ def process(filename):
     result = {}
     output = StringIO.StringIO()
     caching = True
-    
+
     pagenos = set()
     rsrcmgr = PDFResourceManager(caching=caching)
-    
+
     outfp = output
     maxpages = 0
     password = ""
     codec = "utf-8"
-    
+
     device = TextConverter(rsrcmgr, outfp, codec=codec)
-    
+
     process_pdf(rsrcmgr, device, fp, pagenos, maxpages=maxpages, password=password,
                         caching=caching, check_extractable=True)
-    
-    
+
+
     result['content'] = {}
     result['content']['hash'] = []
     result['content']['ipv4'] = []
-    
+
     for x in hashmatch.findall(output.getvalue()):
         if x in result['content']['hash']:
             continue
         result['content']['hash'].append(x.lower())
-    
+
     for x in find_ip4.findall(output.getvalue()):
         if x in result['content']['ipv4']:
             continue
         result['content']['ipv4'].append(x)
-    
-    
+
+
     result['file'] = {}
     result['file']['parsed'] = time.time()
     result['file']['name'] = filename.split("/")[-1]
@@ -86,12 +86,12 @@ def process(filename):
     result['file']['hash']['md5'] = produce_md5(filename)
     result['file']['hash']['sha1'] = produce_sha1(filename)
     result['file']['saved'] = save_to_storage(filename)
-    
+
     result['content']['hash'].sort()
     result['content']['ipv4'].sort()
-    
+
     result['id'] = result['file']['hash']['sha1']
-    
+
     output.close()
 
     return result
@@ -113,9 +113,8 @@ if __name__ == '__main__':
     except:
         print >> sys.stderr, "File not found."
         sys.exit(1)
-    
-    result = process(filename) 
+
+    result = process(filename)
     store(result)
 
     print simplejson.dumps(result, sort_keys=True, indent=4)
-
