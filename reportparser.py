@@ -13,8 +13,7 @@ import time
 from sys import stderr
 from pdfminer.pdfinterp import PDFResourceManager, process_pdf
 from pdfminer.converter import TextConverter
-
-
+from pdfminer.layout import LAParams
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
@@ -32,7 +31,7 @@ args = parser.parse_args()
 
 find_ip4 = re.compile(r"\b((?:\d{1,3}\.){3}\d{1,3})")
 hashmatch = re.compile(r"\b([a-fA-F0-9]{128}|[a-fA-F0-9]{32}|[a-fA-F0-9]{40})\b")
-
+cvematch = re.compile(r"CVE-\d{4}-\d+\b", re.I)
 try:
     config = ConfigParser.ConfigParser()
     config.readfp(open(os.path.expanduser(args.config)))
@@ -40,15 +39,18 @@ except IOError, err:
     print >> stderr, "Could not open ~/.reportparser.conf:", err.strerror
     exit(1)
 
+
 def produce_md5(filename):
     f = file(filename, "rb")
     q = md5.new(f.read())
     return q.hexdigest()
 
+
 def produce_sha1(filename):
     f = file(filename, "rb")
     q = sha.sha(f.read())
     return q.hexdigest()
+
 
 def save_to_storage(filename):
     try:
@@ -58,6 +60,7 @@ def save_to_storage(filename):
     except (shutil.Error, IOError), err:
         print >> stderr, "Could not store {} to {}: {}".format(filename, config.get("reportparser", "storage"), err.strerror)
         return False
+
 
 def process(filename):
     result = {}
@@ -72,15 +75,15 @@ def process(filename):
     password = ""
     codec = "utf-8"
 
-    device = TextConverter(rsrcmgr, outfp, codec=codec)
+    device = TextConverter(rsrcmgr, outfp, codec=codec, laparams=LAParams())
 
-    process_pdf(rsrcmgr, device, fp, pagenos, maxpages=maxpages, password=password,
-                        caching=caching, check_extractable=True)
-
+    process_pdf(rsrcmgr, device, fp, pagenos, maxpages=maxpages,
+                password=password, caching=caching, check_extractable=True)
 
     result['content'] = {}
     result['content']['hash'] = []
     result['content']['ipv4'] = []
+    result['content']['cve'] = []
 
     for x in hashmatch.findall(output.getvalue()):
         if x in result['content']['hash']:
@@ -92,6 +95,10 @@ def process(filename):
             continue
         result['content']['ipv4'].append(x)
 
+    for x in cvematch.findall(output.getvalue()):
+        if x in result['content']['cve']:
+            continue
+        result['content']['cve'].append(x)
 
     result['file'] = {}
     result['file']['parsed'] = time.time()
@@ -110,9 +117,10 @@ def process(filename):
 
     return result
 
+
 def store(result):
-    import pymongo
-    connection = pymongo.Connection(host=config.get("db", "mongohost"))
+    from pymongo import MongoClient
+    connection = MongoClient(config.get("db", "mongohost"))
     inteldb = connection.intel
     result['_id'] = result.pop('id')
     inteldb.reports.save(result)
@@ -122,7 +130,7 @@ if __name__ == '__main__':
     for filename in args.report:
         try:
             fp = file(filename, "rb")
-        except:
+        except IOError, err:
             print >> stderr, "File not found."
             exit(1)
 
