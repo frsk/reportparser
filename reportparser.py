@@ -39,7 +39,7 @@ hashmatch = re.compile(r"\b([a-fA-F0-9]{128}|[a-fA-F0-9]{32}|[a-fA-F0-9]{40})\b"
 cvematch = re.compile(r"CVE-\d{4}-\d+\b", re.I)
 domainmatch = re.compile(r"\b(([a-zA-Z.-]{4,})\.([a-z]{1,8}))\b", re.I)
 urlmatch = re.compile(r"""((?:https?|ftp)://[^\s/$.?#].[^\s]*)""")
-filematch = re.compile(r"\b(([a-zA-Z]{2,255})\.(exe|dll|msi))\b", re.I)
+filematch = re.compile(r"\b(([a-zA-Z]{2,255})\.(exe|dll|msi|so))\b", re.I)
 
 try:
     config = ConfigParser.ConfigParser()
