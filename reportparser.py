@@ -38,6 +38,7 @@ find_ip4 = re.compile(r"\b((?:\d{1,3}\.){3}\d{1,3})")
 hashmatch = re.compile(r"\b([a-fA-F0-9]{128}|[a-fA-F0-9]{32}|[a-fA-F0-9]{40})\b")
 cvematch = re.compile(r"CVE-\d{4}-\d+\b", re.I)
 domainmatch = re.compile(r"\b(([a-zA-Z.-]{4,})\.([a-z]{1,8}))\b", re.I)
+urlmatch = re.compile(r"""((?:https?|ftp)://[^\s/$.?#].[^\s]*)""")
 
 try:
     config = ConfigParser.ConfigParser()
@@ -93,6 +94,7 @@ def process(filename):
     result['content']['hash'] = []
     result['content']['ipv4'] = []
     result['content']['cve'] = []
+    result['content']['url'] = []
 
     for x in domainmatch.findall(output.getvalue()):
         if x[0].lower() in result['content']['domain']:
@@ -114,6 +116,10 @@ def process(filename):
             continue
         result['content']['cve'].append(x)
 
+    for x in urlmatch.findall(output.getvalue()):
+        if x in result['content']['url']:
+            continue
+        result['content']['url'].append(x)
 
     result['file'] = {}
     result['file']['parsed'] = time.time()
