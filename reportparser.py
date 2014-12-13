@@ -139,7 +139,7 @@ def process(filename):
     return result
 
 
-def store(result):
+def store_mongodb(result):
     from pymongo import MongoClient
     connection = MongoClient(config.get("db", "mongohost"))
     inteldb = connection.intel
@@ -158,7 +158,7 @@ if __name__ == '__main__':
 
         result = process(filename)
         if not args.disable_mongo:
-            store(result)
+            store_mongodb(result)
 
         if not args.quiet:
             print simplejson.dumps(result, sort_keys=True, indent=4)
