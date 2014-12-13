@@ -31,7 +31,7 @@ args = parser.parse_args()
 
 find_ip4 = re.compile(r"\b((?:\d{1,3}\.){3}\d{1,3})")
 hashmatch = re.compile(r"\b([a-fA-F0-9]{128}|[a-fA-F0-9]{32}|[a-fA-F0-9]{40})\b")
-
+cvematch = re.compile(r"CVE-\d{4}-\d+\b", re.I)
 try:
     config = ConfigParser.ConfigParser()
     config.readfp(open(os.path.expanduser(args.config)))
@@ -75,9 +75,11 @@ def process(filename):
 
     process_pdf(rsrcmgr, device, fp, pagenos, maxpages=maxpages,
                 password=password, caching=caching, check_extractable=True)
+
     result['content'] = {}
     result['content']['hash'] = []
     result['content']['ipv4'] = []
+    result['content']['cve'] = []
 
     for x in hashmatch.findall(output.getvalue()):
         if x in result['content']['hash']:
@@ -89,6 +91,10 @@ def process(filename):
             continue
         result['content']['ipv4'].append(x)
 
+    for x in cvematch.findall(output.getvalue()):
+        if x in result['content']['cve']:
+            continue
+        result['content']['cve'].append(x)
 
     result['file'] = {}
     result['file']['parsed'] = time.time()
