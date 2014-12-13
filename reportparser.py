@@ -13,8 +13,7 @@ import time
 from sys import stderr
 from pdfminer.pdfinterp import PDFResourceManager, process_pdf
 from pdfminer.converter import TextConverter
-
-
+from pdfminer.layout import LAParams
 
 parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
@@ -72,12 +71,10 @@ def process(filename):
     password = ""
     codec = "utf-8"
 
-    device = TextConverter(rsrcmgr, outfp, codec=codec)
+    device = TextConverter(rsrcmgr, outfp, codec=codec, laparams=LAParams())
 
-    process_pdf(rsrcmgr, device, fp, pagenos, maxpages=maxpages, password=password,
-                        caching=caching, check_extractable=True)
-
-
+    process_pdf(rsrcmgr, device, fp, pagenos, maxpages=maxpages,
+                password=password, caching=caching, check_extractable=True)
     result['content'] = {}
     result['content']['hash'] = []
     result['content']['ipv4'] = []
