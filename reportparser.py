@@ -25,6 +25,10 @@ parser.add_argument('-d', '--disable-mongo',
                     help="Do not store in MongoDB",
                     action="store_true")
 
+parser.add_argument('-q', '--quiet',
+                    help="Disable output to terminal",
+                    action="store_true")
+
 parser.add_argument('report', nargs='+', help="PDF reports to parse")
 
 args = parser.parse_args()
@@ -140,4 +144,5 @@ if __name__ == '__main__':
         if not args.disable_mongo:
             store(result)
 
-        print simplejson.dumps(result, sort_keys=True, indent=4)
+        if not args.quiet:
+            print simplejson.dumps(result, sort_keys=True, indent=4)
