@@ -126,6 +126,7 @@ def store(result):
     result['_id'] = result.pop('id')
     inteldb.reports.save(result)
     connection.close()
+    return True
 
 if __name__ == '__main__':
     for filename in args.report:
