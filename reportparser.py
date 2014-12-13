@@ -57,6 +57,7 @@ def save_to_storage(filename):
         f = open(filename, "rb")
         destination_file = "{}/{}.pdf".format(config.get("reportparser", "storage"), produce_sha1(filename))
         shutil.copyfile(filename, destination_file)
+        return True
     except (shutil.Error, IOError), err:
         print >> stderr, "Could not store {} to {}: {}".format(filename, config.get("reportparser", "storage"), err.strerror)
         return False
