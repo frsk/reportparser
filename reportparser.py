@@ -1,27 +1,43 @@
 #!/usr/bin/python
+import argparse
+import ConfigParser
+import md5
+import os
+import re
+import sha
+import shutil
+import StringIO
+import simplejson
+import time
+
+from sys import stderr
 from pdfminer.pdfinterp import PDFResourceManager, process_pdf
 from pdfminer.converter import TextConverter
 
-import os
-import sys
-import StringIO
-import time
-import re
-import simplejson
-import md5
-import sha
-import pymongo
-import ConfigParser
+
+
+parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+parser.add_argument('-c', '--config',
+                    help="Configuration file",
+                    default="~/.reportparser.conf",
+                    type=str)
+parser.add_argument('-d', '--disable-mongo',
+                    help="Do not store in MongoDB",
+                    action="store_true")
+
+parser.add_argument('report', nargs='+', help="PDF reports to parse")
+
+args = parser.parse_args()
 
 find_ip4 = re.compile(r"\b((?:\d{1,3}\.){3}\d{1,3})")
 hashmatch = re.compile(r"\b([a-fA-F0-9]{128}|[a-fA-F0-9]{32}|[a-fA-F0-9]{40})\b")
 
 try:
     config = ConfigParser.ConfigParser()
-    config.readfp(open(os.path.expanduser("~/.reportparser.conf")))
-except:
-    print >> sys.stderr, "File ~/.reportparser.conf not found."
-    from sys import exit
+    config.readfp(open(os.path.expanduser(args.config)))
+except IOError, err:
+    print >> stderr, "Could not open ~/.reportparser.conf:", err.strerror
     exit(1)
 
 def produce_md5(filename):
@@ -36,13 +52,11 @@ def produce_sha1(filename):
 
 def save_to_storage(filename):
     try:
-        f = file(filename, "rb")
-        output = file("%s/%s.pdf" % (config.get("reportparser", "storage"), produce_sha1(filename)), "w")
-        output.write(f.read())
-        f.close()
-        output.close()
-        return True
-    except:
+        f = open(filename, "rb")
+        destination_file = "{}/{}.pdf".format(config.get("reportparser", "storage"), produce_sha1(filename))
+        shutil.copyfile(filename, destination_file)
+    except (shutil.Error, IOError), err:
+        print >> stderr, "Could not store {} to {}: {}".format(filename, config.get("reportparser", "storage"), err.strerror)
         return False
 
 def process(filename):
@@ -97,6 +111,7 @@ def process(filename):
     return result
 
 def store(result):
+    import pymongo
     connection = pymongo.Connection(host=config.get("db", "mongohost"))
     inteldb = connection.intel
     result['_id'] = result.pop('id')
@@ -104,17 +119,15 @@ def store(result):
     connection.close()
 
 if __name__ == '__main__':
-    if not len(sys.argv) == 2:
-        print >> sys.stderr, "Provide a file."
-        sys.exit(1)
-    try:
-        filename = sys.argv[1]
-        fp = file(filename, "rb")
-    except:
-        print >> sys.stderr, "File not found."
-        sys.exit(1)
+    for filename in args.report:
+        try:
+            fp = file(filename, "rb")
+        except:
+            print >> stderr, "File not found."
+            exit(1)
 
-    result = process(filename)
-    store(result)
+        result = process(filename)
+        if not args.disable_mongo:
+            store(result)
 
-    print simplejson.dumps(result, sort_keys=True, indent=4)
+        print simplejson.dumps(result, sort_keys=True, indent=4)
