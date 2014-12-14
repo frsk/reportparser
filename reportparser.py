@@ -38,7 +38,7 @@ ipv4match = re.compile(r"\b((?:\d{1,3}\.){3}\d{1,3})")
 hashmatch = re.compile(r"\b([a-fA-F0-9]{128}|[a-fA-F0-9]{32}|[a-fA-F0-9]{40})\b")
 cvematch = re.compile(r"CVE-\d{4}-\d+\b", re.I)
 domainmatch = re.compile(r"\b(([a-zA-Z.-]{4,})\.([a-z]{1,8}))\b", re.I)
-urlmatch = re.compile(r"""((?:https?|ftp)://[^\s/$.?#].[^\s]*)""")
+urlmatch = re.compile(r"""((?:https?|ftp)://[^\s/$.?#].[^\s]*)""", re.I)
 filematch = re.compile(r"\b(([a-zA-Z]{2,255})\.(exe|dll|msi|so))\b", re.I)
 registrymatch = re.compile(r"(HK(?:(?:LM|CR|CU|CC)|EY_.*?)\\.*)", re.I)
 
@@ -48,7 +48,6 @@ try:
 except IOError, err:
     print >> stderr, "Could not open ~/.reportparser.conf:", err.strerror
     exit(1)
-
 
 def produce_md5(filename):
     f = file(filename, "rb")
@@ -60,7 +59,6 @@ def produce_sha1(filename):
     f = file(filename, "rb")
     q = sha.sha(f.read())
     return q.hexdigest()
-
 
 def save_to_storage(filename):
     try:
