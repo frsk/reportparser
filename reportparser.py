@@ -111,9 +111,9 @@ def process(filename):
         result['content']['ipv4'].append(x)
 
     for x in cvematch.findall(output.getvalue()):
-        if x in result['content']['cve']:
+        if x.lower() in result['content']['cve']:
             continue
-        result['content']['cve'].append(x)
+        result['content']['cve'].append(x.lower())
 
     for x in filematch.findall(output.getvalue()):
         if x[0].lower() in result['content']['filename']:
