@@ -41,6 +41,7 @@ domainmatch = re.compile(r"\b(([a-zA-Z.-]{4,})\.([a-z]{1,8}))\b", re.I)
 urlmatch = re.compile(r"""((?:https?|ftp)://[^\s/$.?#].[^\s]*)""", re.I)
 filematch = re.compile(r"\b(([a-zA-Z]{2,255})\.(exe|dll|msi|so))\b", re.I)
 registrymatch = re.compile(r"(HK(?:(?:LM|CR|CU|CC)|EY_.*?)\\.*)", re.I)
+emailmatch = re.compile(r"[a-z0-9!#$%&*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", re.I)
 
 try:
     config = ConfigParser.ConfigParser()
@@ -90,7 +91,7 @@ def process(filename):
                 password=password, caching=caching, check_extractable=True)
 
     result['content'] = {}
-    content_types = ['cve', 'domain', 'hash', 'filename', 'ipv4', 'registry', 'url']
+    content_types = ['cve', 'domain', 'hash', 'filename', 'ipv4', 'registry', 'url', 'email']
     for name in content_types:
         if not name in result['content']:
             result['content'][name] = []
@@ -129,6 +130,11 @@ def process(filename):
         if x in result['content']['registry']:
             continue
         result['content']['registry'].append(x)
+
+    for x in emailmatch.findall(output.getvalue()):
+        if x.lower() in result['content']['email']:
+            continue
+        result['content']['email'].append(x.lower())
 
     result['file'] = {}
     result['file']['parsed'] = time.time()
