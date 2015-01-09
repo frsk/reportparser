@@ -34,7 +34,7 @@ parser.add_argument('report', nargs='+', help="PDF reports to parse")
 
 args = parser.parse_args()
 
-ipv4match = re.compile(r"\b((?:\d{1,3}\.){3}\d{1,3})")
+ipv4match = re.compile(r"\b((?:\d{1,3}\.){3}\d{1,3}(/[0-9][0-9])?)")
 hashmatch = re.compile(r"\b([a-fA-F0-9]{128}|[a-fA-F0-9]{32}|[a-fA-F0-9]{40})\b")
 cvematch = re.compile(r"CVE-\d{4}-\d+\b", re.I)
 domainmatch = re.compile(r"\b(([a-zA-Z.-]{4,})\.([a-z]{1,8}))\b", re.I)
@@ -106,9 +106,9 @@ def process(filename):
         result['content']['hash'].append(x.lower())
 
     for x in ipv4match.findall(output.getvalue()):
-        if x in result['content']['ipv4']:
+        if x[0] in result['content']['ipv4']:
             continue
-        result['content']['ipv4'].append(x)
+        result['content']['ipv4'].append(x[0])
 
     for x in cvematch.findall(output.getvalue()):
         if x.lower() in result['content']['cve']:
