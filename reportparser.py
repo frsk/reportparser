@@ -34,12 +34,12 @@ parser.add_argument('report', nargs='+', help="PDF reports to parse")
 
 args = parser.parse_args()
 
-ipv4match = re.compile(r"\b((?:\d{1,3}\.){3}\d{1,3}(/[0-9][0-9])?)")
+ipv4match = re.compile(r"\b((?:\d{1,3}\.){3}\d{1,3}(?:/[0-9][0-9])?)")
 hashmatch = re.compile(r"\b([a-fA-F0-9]{128}|[a-fA-F0-9]{32}|[a-fA-F0-9]{40})\b")
 cvematch = re.compile(r"CVE-\d{4}-\d+\b", re.I)
-domainmatch = re.compile(r"\b(([a-zA-Z.-]{4,})\.([a-z]{1,8}))\b", re.I)
+domainmatch = re.compile(r"\b((?:[a-zA-Z.-]{4,})\.(?:[a-z]{1,8}))\b", re.I)
 urlmatch = re.compile(r"""((?:https?|ftp)://[^\s/$.?#].[^\s]*)""", re.I)
-filematch = re.compile(r"\b(([a-zA-Z]{2,255})\.(exe|dll|msi|so))\b", re.I)
+filematch = re.compile(r"\b((?:[a-zA-Z]{2,255})\.(?:exe|dll|msi|so))\b", re.I)
 registrymatch = re.compile(r"(HK(?:(?:LM|CR|CU|CC)|EY_.*?)\\.*)", re.I)
 emailmatch = re.compile(r"[a-z0-9!#$%&*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", re.I)
 
@@ -97,9 +97,9 @@ def process(filename):
             result['content'][name] = []
 
     for x in domainmatch.findall(output.getvalue()):
-        if x[0].lower() in result['content']['domain']:
+        if x.lower() in result['content']['domain']:
             continue
-        result['content']['domain'].append(x[0].lower())
+        result['content']['domain'].append(x.lower())
 
     for x in hashmatch.findall(output.getvalue()):
         if x in result['content']['hash']:
@@ -107,9 +107,9 @@ def process(filename):
         result['content']['hash'].append(x.lower())
 
     for x in ipv4match.findall(output.getvalue()):
-        if x[0] in result['content']['ipv4']:
+        if x in result['content']['ipv4']:
             continue
-        result['content']['ipv4'].append(x[0])
+        result['content']['ipv4'].append(x)
 
     for x in cvematch.findall(output.getvalue()):
         if x.lower() in result['content']['cve']:
@@ -117,9 +117,9 @@ def process(filename):
         result['content']['cve'].append(x.lower())
 
     for x in filematch.findall(output.getvalue()):
-        if x[0].lower() in result['content']['filename']:
+        if x.lower() in result['content']['filename']:
             continue
-        result['content']['filename'].append(x[0].lower())
+        result['content']['filename'].append(x.lower())
 
     for x in urlmatch.findall(output.getvalue()):
         if x in result['content']['url']:
