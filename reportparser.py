@@ -30,6 +30,10 @@ parser.add_argument('-q', '--quiet',
                     help="Disable output to terminal",
                     action="store_true")
 
+parser.add_argument('-s', '--no-save',
+                    help="Do not save document to storage",
+                    action="store_true")
+
 parser.add_argument('report', nargs='+', help="PDF reports to parse")
 
 args = parser.parse_args()
@@ -59,13 +63,14 @@ def produce_md5(filename):
     q = md5.new(f.read())
     return q.hexdigest()
 
-
 def produce_sha1(filename):
     f = file(filename, "rb")
     q = sha.sha(f.read())
     return q.hexdigest()
 
 def save_to_storage(filename):
+    if args.no_save:
+        return False
     try:
         f = open(filename, "rb")
         destination_file = "{}/{}.pdf".format(config.get("reportparser", "storage"), produce_sha1(filename))
