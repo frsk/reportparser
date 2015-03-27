@@ -22,8 +22,8 @@ parser.add_argument('-c', '--config',
                     default="~/.reportparser.conf",
                     type=str)
 
-parser.add_argument('-d', '--disable-mongo',
-                    help="Do not store in MongoDB",
+parser.add_argument('-d', '--disable-database',
+                    help="Disable database storage",
                     action="store_true")
 
 parser.add_argument('-q', '--quiet',
@@ -52,7 +52,7 @@ registrymatch = re.compile(r"(HK(?:(?:LM|CR|CU|CC)|EY_.*?)\\.*)", re.I)
 emailmatch = re.compile(r"[a-z0-9!#$%&*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", re.I)
 
 try:
-    if not (args.no_save and args.disable_mongo):
+    if not (args.no_save and args.disable_database):
         config = ConfigParser.ConfigParser()
         config.readfp(open(os.path.expanduser(args.config)))
 except IOError, err:
@@ -165,7 +165,7 @@ def process(filename):
     return result
 
 
-def store_mongodb(result):
+def store_database(result):
     from pymongo import MongoClient
     connection = MongoClient(config.get("db", "mongohost"))
     inteldb = connection.intel
@@ -183,8 +183,8 @@ if __name__ == '__main__':
             exit(1)
 
         result = process(filename)
-        if not args.disable_mongo:
-            store_mongodb(result)
+        if not args.disable_database:
+            store_database(result)
 
         if not args.quiet:
             print simplejson.dumps(result, sort_keys=True, indent=4)
