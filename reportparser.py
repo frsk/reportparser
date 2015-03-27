@@ -52,8 +52,9 @@ registrymatch = re.compile(r"(HK(?:(?:LM|CR|CU|CC)|EY_.*?)\\.*)", re.I)
 emailmatch = re.compile(r"[a-z0-9!#$%&*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?", re.I)
 
 try:
-    config = ConfigParser.ConfigParser()
-    config.readfp(open(os.path.expanduser(args.config)))
+    if not (args.no_save and args.disable_mongo):
+        config = ConfigParser.ConfigParser()
+        config.readfp(open(os.path.expanduser(args.config)))
 except IOError, err:
     print >> stderr, "Could not open ~/.reportparser.conf:", err.strerror
     exit(1)
