@@ -1,12 +1,15 @@
 #!/usr/bin/python
 import argparse
-import ConfigParser
-import md5
+try:
+    from ConfigParser import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
+
+import hashlib
 import os
 import re
-import sha
 import shutil
-import StringIO
+import io
 import simplejson
 import time
 
@@ -53,20 +56,20 @@ emailmatch = re.compile(r"[a-z0-9!#$%&*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&*+/=?^_`{|
 
 try:
     if not (args.no_save and args.disable_database):
-        config = ConfigParser.ConfigParser()
+        config = ConfigParser()
         config.readfp(open(os.path.expanduser(args.config)))
-except IOError, err:
+except IOError as err:
     print >> stderr, "Could not open ~/.reportparser.conf:", err.strerror
     exit(1)
 
 def produce_md5(filename):
-    f = file(filename, "rb")
-    q = md5.new(f.read())
+    f = open(filename, "rb")
+    q = hashlib.md5(f.read())
     return q.hexdigest()
 
 def produce_sha1(filename):
-    f = file(filename, "rb")
-    q = sha.sha(f.read())
+    f = open(filename, "rb")
+    q = hashlib.sha1(f.read())
     return q.hexdigest()
 
 def save_to_storage(filename):
@@ -77,14 +80,14 @@ def save_to_storage(filename):
         destination_file = "{}/{}.pdf".format(config.get("reportparser", "storage"), produce_sha1(filename))
         shutil.copyfile(filename, destination_file)
         return True
-    except (shutil.Error, IOError), err:
+    except (shutil.Error, IOError) as err:
         print >> stderr, "Could not store {} to {}: {}".format(filename, config.get("reportparser", "storage"), err.strerror)
         return False
 
 
 def process(filename):
     result = {}
-    output = StringIO.StringIO()
+    output = io.StringIO()
     caching = True
 
     pagenos = set()
@@ -177,8 +180,8 @@ def store_database(result):
 if __name__ == '__main__':
     for filename in args.report:
         try:
-            fp = file(filename, "rb")
-        except IOError, err:
+            fp = open(filename, "rb")
+        except IOError as err:
             print >> stderr, "File not found."
             exit(1)
 
@@ -187,4 +190,4 @@ if __name__ == '__main__':
             store_database(result)
 
         if not args.quiet:
-            print simplejson.dumps(result, sort_keys=True, indent=4)
+            print(simplejson.dumps(result, sort_keys=True, indent=4))
