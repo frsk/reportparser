@@ -2,4 +2,4 @@
 storage = /path
 
 [db]
-mongohost = hostname
+host = hostname

@@ -181,12 +181,10 @@ def process(filename):
 
 
 def store_database(result):
-    from pymongo import MongoClient
-    connection = MongoClient(config.get("db", "mongohost"))
-    inteldb = connection.intel
-    result['_id'] = result.pop('id')
-    inteldb.reports.save(result)
-    connection.close()
+    from elasticsearch import Elasticsearch
+    es_host = "{}:9200".format(config.get("db", "host"))
+    es = Elasticsearch(es_host)
+    es.index(index="intel", id=result.pop('id'), doc_type="intel", body=result)
     return True
 
 if __name__ == '__main__':
