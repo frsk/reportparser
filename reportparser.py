@@ -173,7 +173,7 @@ def store_database(result):
     from elasticsearch import Elasticsearch
     es_host = "{}:9200".format(config.get("db", "host"))
     es = Elasticsearch(es_host)
-    es.index(index="intel", id=result.pop('id'), doc_type="intel", body=result)
+    es.index(index="intel", id=result.pop('id'), doc_type="pdf", body=result)
     return True
 
 if __name__ == '__main__':
