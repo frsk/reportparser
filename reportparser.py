@@ -14,7 +14,8 @@ import simplejson
 import time
 
 from sys import stderr
-from pdfminer.pdfinterp import PDFResourceManager, process_pdf
+from pdfminer.pdfpage import PDFPage
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.converter import TextConverter
 from pdfminer.layout import LAParams
 
@@ -99,9 +100,9 @@ def process(filename):
     codec = "utf-8"
 
     device = TextConverter(rsrcmgr, outfp, codec=codec, laparams=LAParams())
-
-    process_pdf(rsrcmgr, device, fp, pagenos, maxpages=maxpages,
-                password=password, caching=caching, check_extractable=True)
+    interpreter = PDFPageInterpreter(rsrcmgr, device)
+    for page in PDFPage.get_pages(fp, pagenos, maxpages=maxpages):
+        interpreter.process_page(page)
 
     result['content'] = {}
     content_types = ['cve', 'domain', 'hash', 'filename', 'ipv4', 'registry', 'url', 'email']
