@@ -12,7 +12,7 @@ import re
 import shutil
 import io
 import simplejson
-import time
+from datetime import datetime
 
 import pycountry
 from sys import stderr
@@ -164,7 +164,7 @@ def process(filename):
         result['content']['email'].append(x.lower())
 
     result['file'] = {}
-    result['file']['parsed'] = time.time()
+    result['file']['parsed'] = datetime.now()
     result['file']['name'] = filename.split("/")[-1]
     result['file']['hash'] = {}
     result['file']['hash']['md5'] = produce_md5(filename)
