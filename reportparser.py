@@ -94,7 +94,7 @@ def save_to_storage(filename):
 
 def process(filename):
     result = {}
-    output = io.StringIO()
+    output = io.BytesIO()
     caching = True
 
     pagenos = set()
