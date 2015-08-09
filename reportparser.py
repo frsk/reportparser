@@ -78,17 +78,14 @@ def produce_sha1(filename):
     q = hashlib.sha1(f.read())
     return q.hexdigest()
 
-def save_to_storage(filename):
+def save_to_storage(filename, sha1):
     if args.no_save:
         return False
-    try:
-        f = open(filename, "rb")
-        destination_file = "{}/{}.pdf".format(config.get("reportparser", "storage"), produce_sha1(filename))
-        shutil.copyfile(filename, destination_file)
-        return True
-    except (shutil.Error, IOError) as err:
-        print >> stderr, "Could not store {} to {}: {}".format(filename, config.get("reportparser", "storage"), err.strerror)
-        return False
+    from hdfs import Client
+
+    client = Client('http://{}:50070'.format(config.get("hdfs", "host")), root=config.get("reportparser", "storage"))
+    uploaded = client.upload(sha1, filename, overwrite=True)
+    return uploaded
 
 
 def process(filename):
@@ -168,7 +165,7 @@ def process(filename):
     result['file']['hash'] = {}
     result['file']['hash']['md5'] = produce_md5(filename)
     result['file']['hash']['sha1'] = produce_sha1(filename)
-    result['file']['saved'] = save_to_storage(filename)
+    result['file']['saved'] = save_to_storage(filename, result['file']['hash']['sha1'])
 
     [result['content'][name].sort() for name in content_types]
 
