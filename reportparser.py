@@ -13,7 +13,6 @@ import shutil
 import io
 import simplejson
 from datetime import datetime
-
 import pycountry
 from sys import stderr
 from pdfminer.pdfpage import PDFPage
