@@ -187,6 +187,14 @@ def store_database(result):
     es.index(index="intel", id=result.pop('id'), doc_type="pdf", body=result)
     return True
 
+def datetime_serialiser(obj):
+    """
+    Datetime JSON serializer
+    """
+    if isinstance(obj, datetime):
+        obj = str(obj)
+    return obj
+
 if __name__ == '__main__':
     for filename in args.report:
         try:
@@ -200,4 +208,4 @@ if __name__ == '__main__':
             store_database(result)
 
         if not args.quiet:
-            print(simplejson.dumps(result, sort_keys=True, indent=4))
+            print(simplejson.dumps(result, sort_keys=True, indent=4, default=datetime_serialiser))
