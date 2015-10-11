@@ -15,8 +15,7 @@ import simplejson
 from datetime import datetime
 import pycountry
 from sys import stderr
-from pdfminer.pdfpage import PDFPage
-from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.pdfinterp import PDFResourceManager, process_pdf
 from pdfminer.converter import TextConverter
 from pdfminer.layout import LAParams
 
@@ -102,9 +101,9 @@ def process(filename):
     codec = "utf-8"
 
     device = TextConverter(rsrcmgr, outfp, codec=codec, laparams=LAParams())
-    interpreter = PDFPageInterpreter(rsrcmgr, device)
-    for page in PDFPage.get_pages(fp, pagenos, maxpages=maxpages):
-        interpreter.process_page(page)
+
+    process_pdf(rsrcmgr, device, fp, pagenos, maxpages=maxpages,
+                password=password, caching=caching, check_extractable=True)
 
     result['content'] = {}
     content_types = ['cve', 'domain', 'hash', 'filename', 'ipv4', 'registry', 'url', 'email', 'country']
