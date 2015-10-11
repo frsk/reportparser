@@ -8,3 +8,9 @@ Usage
 
 To generate an output without the need of a configuration file and/or database, run `python reportparser.py -d -s
 Report.pdf`to generate a report based on the PDF file `Report.pdf`.
+
+Dependencies
+============
+
+* https://github.com/goulu/pdfminer
+
